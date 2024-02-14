@@ -4,16 +4,16 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.stereotype.Service;
-
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-
 @Service
 public class TaskService {
     @Autowired
     private TaskRepository taskRepository;
+    @Autowired
+    private PerformerService performerService;
 
     public Task createTask(Task task){
         task.setDate(String.valueOf(Calendar.getInstance().getTime()));
@@ -36,7 +36,6 @@ public class TaskService {
         return taskRepository.save(taskRepository.findById(id).get());
     }
     public void deleteTask (Long id) {
-        getTaskById(id);
         taskRepository.deleteById(id);
     }
     public List<Task> sortById() {
@@ -46,4 +45,19 @@ public class TaskService {
                 .sorted(Comparator.comparing(Task::getId))
                 .collect(Collectors.toList());
     }
+    public Task assignPerformerToTask(Long id, Long performerId){
+        Task existingTask = getTaskById(id);
+        Performer performer = performerService.findPerformerById(performerId);
+        existingTask.getPerformer().add(performer);
+//        performer.getTasks().add(existingTask);
+        return taskRepository.save(existingTask);
+    }
+    public Task deassingPerformerToTask(Long id, Long performerId){
+        Task existingTask = getTaskById(id);
+        existingTask.getPerformer().removeIf(performer -> performer.getId().equals(performerId));
+        Performer performer = performerService.findPerformerById(performerId);
+//        performer.getTasks().removeIf(task -> task.getId().equals(id));
+        return taskRepository.save(existingTask);
+    }
+
 }
