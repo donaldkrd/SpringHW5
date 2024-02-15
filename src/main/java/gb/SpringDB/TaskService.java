@@ -4,6 +4,7 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.stereotype.Service;
+
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
@@ -46,17 +47,15 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
     public Task assignPerformerToTask(Long id, Long performerId){
-        Task existingTask = getTaskById(id);
-        Performer performer = performerService.findPerformerById(performerId);
-        existingTask.getPerformer().add(performer);
-//        performer.getTasks().add(existingTask);
+        Task existingTask = getTaskById(id); // Нашли задачу
+        Performer performer = performerService.findPerformerById(performerId); // нашли исполнителя
+        existingTask.getPerformers().add(performer); // у задачи добавили исполнителя в список исполнителей
         return taskRepository.save(existingTask);
     }
     public Task deassingPerformerToTask(Long id, Long performerId){
         Task existingTask = getTaskById(id);
-        existingTask.getPerformer().removeIf(performer -> performer.getId().equals(performerId));
+        existingTask.getPerformers().removeIf(performer -> performer.getId().equals(performerId));
         Performer performer = performerService.findPerformerById(performerId);
-//        performer.getTasks().removeIf(task -> task.getId().equals(id));
         return taskRepository.save(existingTask);
     }
 
